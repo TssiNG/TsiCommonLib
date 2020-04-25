@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+commonLib/.vs/commonLib/v16/ipch/2285fee5fc4c45d2.ipch
+*.config
+commonLib/.vs/commonLib/v16/.suo
+*.db
+*.ipch
+*.user
+*.log
+*.pdb
+*.tlog
+commonLib/commonLib/Debug/commonLib.vcxproj.FileListAbsolute.txt
+*.idb
+*.filters
