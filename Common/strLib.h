@@ -4,6 +4,7 @@
 #include <string>
 
 namespace common
+{
 namespace str
 {
 void strReplace(std::string &src, const char *from, const char *to);
