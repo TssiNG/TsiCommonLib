@@ -30,7 +30,7 @@ bool common::winutil::ScreenShot(const char* szSavePath)
 
   //BMP图像信息头
   BITMAPINFOHEADER hBmpInfo;
-                   hBmpInfo.biSize          = sizeof(BITMAPINFOHEADER);
+                   hBmpInfo.biSize          = INFO_HEAD;
                    hBmpInfo.biWidth         = iScreenWidth;
                    hBmpInfo.biHeight        = iScreenHeight;
                    hBmpInfo.biPlanes        = TAG_DEV_PLAS;
@@ -67,8 +67,8 @@ bool common::winutil::ScreenShot(const char* szSavePath)
   //汇总所有数据信息
   char *szBmp = new char[dwPicSize];
   ZeroMemory(szBmp, dwPicSize);
-  memcpy(szBmp, (void*)&hBmpFile, sizeof(BITMAPFILEHEADER));
-  memcpy(szBmp + sizeof(BITMAPFILEHEADER), (void*)&hBmpInfo, sizeof(BITMAPINFOHEADER));
+  memcpy(szBmp, (void*)&hBmpFile, FILE_HEAD);
+  memcpy(szBmp + FILE_HEAD, (void*)&hBmpInfo, INFO_HEAD);
   memcpy(szBmp + HEAD_SIZE, bmpSrc, dwSrcSize);
 
   //保存BMP图像
