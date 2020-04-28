@@ -1,109 +1,92 @@
 #include "pch.h"
 #include "windowsUtil.h"
+#include <stdio.h>
 
 #ifdef _WIN32
 
-bool common::winutil::screen_shot(const char* save_path)
+#include <tchar.h>
+
+bool common::winutil::ScreenShot(const char* szSavePath)
 {
-  HBITMAP hBitmap;
+  //显示器屏幕
+  //HDC hCurrScreen = GetDC(NULL);
+  HDC hCurrScreen = CreateDC(_T("display"),NULL,NULL,NULL);
 
-  HDC hScreenDC = CreateDC(L"display",NULL,NULL,NULL);
+  //创建一个兼容的DC,在内存中表示当前位图的上下文
+  HDC hCmpDC = CreateCompatibleDC(hCurrScreen);
 
+  //宽高
+  int iScreenWidth  = GetDeviceCaps(hCurrScreen, HORZRES);
+  int iScreenHeight = GetDeviceCaps(hCurrScreen, VERTRES);
+
+  //当前屏幕位图
+  HBITMAP hBmp = CreateCompatibleBitmap(hCurrScreen, iScreenWidth, iScreenHeight);
+
+  //用当前位图句柄表示内存中屏幕位图上下文
+  SelectObject(hCmpDC,hBmp);
+
+  //将当前屏幕图像复制到内存中
+  BOOL ret = BitBlt(hCmpDC, 0, 0, iScreenWidth, iScreenHeight, hCurrScreen, 0, 0, SRCCOPY);
+
+  //BMP图像信息头
+  BITMAPINFOHEADER hBmpInfo;
+                   hBmpInfo.biSize          = sizeof(BITMAPINFOHEADER);
+                   hBmpInfo.biWidth         = iScreenWidth;
+                   hBmpInfo.biHeight        = iScreenHeight;
+                   hBmpInfo.biPlanes        = TAG_DEV_PLAS;
+                   hBmpInfo.biClrUsed       = NO_COLOR_TAB;
+                   hBmpInfo.biBitCount      = BITS_PER_PIX;
+                   hBmpInfo.biSizeImage     = UNCMP_RGB;
+                   hBmpInfo.biCompression   = BI_RGB;
+                   hBmpInfo.biClrImportant  = ALL_COLOR;
+                   hBmpInfo.biXPelsPerMeter = H_RESOL_0;
+                   hBmpInfo.biYPelsPerMeter = V_RESOL_0;
+
+  //数据源大小
+  DWORD dwSrcSize = ((iScreenWidth * hBmpInfo.biBitCount + 31) / 32) * 4 * iScreenHeight;
+  
+  //截图总大小
+  DWORD dwPicSize = HEAD_SIZE + dwSrcSize;
+
+  //BMP图像文件头
+  BITMAPFILEHEADER hBmpFile;
+                   hBmpFile.bfSize      = dwPicSize;
+                   hBmpFile.bfType      = TYPE_BMP;
+                   hBmpFile.bfOffBits   = HEAD_SIZE;
+                   hBmpFile.bfReserved1 = MUST_ZERO;
+                   hBmpFile.bfReserved2 = MUST_ZERO;
+
+  //BMP图像数据源
+  char *bmpSrc = new char[dwSrcSize];
+  ZeroMemory(bmpSrc, dwSrcSize);
+
+  //检索指定的兼容位图中的所有位元数据
+  //并复制到指定格式的设备无关位图的缓存中
+  GetDIBits(hCmpDC, hBmp, 0, (UINT)iScreenHeight, bmpSrc, (BITMAPINFO*)&hBmpInfo, DIB_RGB_COLORS);
+
+  //汇总所有数据信息
+  char *szBmp = new char[dwPicSize];
+  ZeroMemory(szBmp, dwPicSize);
+  memcpy(szBmp, (void*)&hBmpFile, sizeof(BITMAPFILEHEADER));
+  memcpy(szBmp + sizeof(BITMAPFILEHEADER), (void*)&hBmpInfo, sizeof(BITMAPINFOHEADER));
+  memcpy(szBmp + HEAD_SIZE, bmpSrc, dwSrcSize);
+
+  //保存BMP图像
+  FILE *hFile = fopen(szSavePath, "wb+");
+  if (nullptr != hFile)
+  {
+    size_t count = fwrite(szBmp, 1, dwPicSize, hFile);
+    fclose(hFile);
+  }
+
+  //释放资源
+  ReleaseDC(NULL, hCmpDC);
+  ReleaseDC(NULL,hCurrScreen);
+  delete[] szBmp;
+  delete[] bmpSrc;
+  szBmp  = nullptr;
+  bmpSrc = nullptr;
   return true;
 }
-
-/*
-HBITMAP ScreenCapture(LPSTR filename,WORD BitCount,LPRECT lpRect)
-{
-    HBITMAP hBitmap;
-    //显示器屏幕DC
-    HDC hScreenDC=CreateDC("display",NULL,NULL,NULL);
-    HDC hmenDC=CreateCompatibleDC(hScreenDC);
-    //显示器屏幕的宽和高
-    int ScreenWidth=GetDeviceCaps(hScreenDC,HORZRES);
-    int ScreenHeight=GetDeviceCaps(hScreenDC,VERTRES);
-
-    HBITMAP hOldBM;
-    //保存位图数据
-    PVOID lpvpxldata;
-    //截取获取的长度及起点
-    INT ixStart;
-    INT iyStart;
-    INT iX;
-    INT iY;
-    //位图数据大小
-    DWORD dwBitmapArraySize;
-
-    DWORD nBitsOffset;
-    DWORD lImageSize;
-    DWORD lFileSize;
-
-    BITMAPINFO bmInfo;
-
-    BITMAPFILEHEADER bmFileHeader;
-    HANDLE hbmfile;
-    DWORD dwWritten;
-
-    if(lpRect==NULL)
-    {
-        ixStart=iyStart=0;
-        iX=ScreenWidth;
-        iY=ScreenHeight;
-    }
-    else
-    {
-        ixStart=lpRect->left;
-        iyStart=lpRect->top;
-        iX=lpRect->right - lpRect->left;
-        iY=lpRect->bottom - lpRect->top;
-    }
-    hBitmap=CreateCompatibleBitmap(hScreenDC,iX,iY);
-    hOldBM=(HBITMAP)SelectObject(hmenDC,hBitmap);
-    BitBlt(hmenDC,0,0,iX,iY,hScreenDC,ixStart,iyStart,SRCCOPY);
-    hBitmap=(HBITMAP)SelectObject(hmenDC,hOldBM);
-    if(filename==NULL)
-    {
-        DeleteDC(hScreenDC);
-        DeleteDC(hmenDC);
-        return hBitmap;
-    }
-
-    dwBitmapArraySize = ((((iX*32)+31)&~31)>>3)*iY;
-    lpvpxldata=HeapAlloc(GetProcessHeap(),HEAP_NO_SERIALIZE,dwBitmapArraySize);
-    ZeroMemory(lpvpxldata,dwBitmapArraySize);
-
-    ZeroMemory(&bmInfo,sizeof(BITMAPINFO));
-    bmInfo.bmiHeader.biSize=sizeof(PBITMAPINFOHEADER);
-    bmInfo.bmiHeader.biWidth=iX;
-    bmInfo.bmiHeader.biHeight=iY;
-    bmInfo.bmiHeader.biPlanes=1;
-    bmInfo.bmiHeader.biBitCount=BitCount;
-    bmInfo.bmiHeader.biClrImportant=BI_RGB;
-
-    ZeroMemory(&bmFileHeader,sizeof(BITMAPFILEHEADER));
-    nBitsOffset=sizeof(BITMAPFILEHEADER)+bmInfo.bmiHeader.biSize;
-    lImageSize=((((bmInfo.bmiHeader.biWidth*bmInfo.bmiHeader.biBitCount)+31)& ~31)>>3)*bmInfo.bmiHeader.biHeight;
-    lFileSize=nBitsOffset+lImageSize;
-    bmFileHeader.bfOffBits=nBitsOffset;
-
-    GetDIBits(hmenDC,hBitmap,0,bmInfo.bmiHeader.biHeight,lpvpxldata,&bmInfo,DIB_RGB_COLORS);
-    hbmfile=CreateFile(filename,GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
-
-    if(hbmfile==INVALID_HANDLE_VALUE)
-    {
-        MessageBox(NULL,"create file error","error",MB_OK);
-    }
-    WriteFile(hbmfile,&bmFileHeader,sizeof(BITMAPCOREHEADER),&dwWritten,NULL);
-    WriteFile(hbmfile,&bmInfo,sizeof(BITMAPINFO),&dwWritten,NULL);
-    WriteFile(hbmfile,lpvpxldata,lImageSize,&dwWritten,NULL);
-    CloseHandle(hbmfile);
-
-
-    HeapFree(GetProcessHeap(),HEAP_NO_SERIALIZE,lpvpxldata);
-    ReleaseDC(0,hScreenDC);
-    DeleteDC(hmenDC);
-    return hBitmap;
-}
-*/
 
 #endif
