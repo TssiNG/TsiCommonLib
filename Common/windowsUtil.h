@@ -12,7 +12,7 @@ namespace winutil
 {
 
 #define TAG_DEV_PLAS  1
-#define BITS_PER_PIX  16
+#define BITS_PER_PIX  32
 #define NO_COLOR_TAB  0
 #define UNCMP_RGB     0
 #define H_RESOL_0     0
@@ -30,19 +30,27 @@ struct ShotRect
 {
   ShotRect()
   {
-    x_start = 0;
-    y_start = 0;
-    x_end   = 0;
-    y_end   = 0;
+    x_start     = 0;
+    y_start     = 0;
+    x_end       = 0;
+    y_end       = 0;
+    rect_width  = 0;
+    rect_height = 0;
   }
 
   int x_start;
   int y_start;
   int x_end;
   int y_end;
+  int rect_width;
+  int rect_height;
 };
 
-bool ScreenShot(const char *szSavePath);
+bool ScreenShot(const char *szSavePath, const ShotRect *ShotInfo = nullptr);
+
+bool WindowGetShotInfo(HWND hWnd, common::winutil::ShotRect& ShotInfo);
+
+bool SetWindowTop(HWND hWnd, bool isTop);
 
 }
 }
