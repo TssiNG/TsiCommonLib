@@ -1,8 +1,11 @@
 #ifndef _TSI_WIN_UTIL_
 #define _TSI_WIN_UTIL_
 
+#include <stdio.h>
+
 #ifdef _WIN32
 #include <Windows.h>
+#include <tchar.h>
 
 #pragma warning(disable:4996)
 
@@ -46,11 +49,29 @@ struct ShotRect
   int rect_height;
 };
 
+struct Pos
+{
+  Pos()
+  {
+    x = 0;
+    y = 0;
+  }
+
+  int x;
+  int y;
+};
+
 bool ScreenShot(const char *szSavePath, const ShotRect *ShotInfo = nullptr);
 
-bool WindowGetShotInfo(HWND hWnd, common::winutil::ShotRect& ShotInfo);
+bool WndGetShotRect(HWND hWnd, ShotRect& ShotInfo);
 
-bool SetWindowTop(HWND hWnd, bool isTop);
+bool SetWndTop(HWND hWnd, bool isTop);
+
+HWND GetWndByClsAndName(const TCHAR* szWndCls, const TCHAR* szWndName);
+
+void WndGetShotcut(HWND hWnd, const char *szSavePath);
+
+void SendWndMouseClickL(HWND hWnd, Pos clickPos);
 
 }
 }

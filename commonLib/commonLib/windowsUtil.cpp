@@ -1,10 +1,7 @@
 #include "pch.h"
 #include "windowsUtil.h"
-#include <stdio.h>
 
 #ifdef _WIN32
-
-#include <tchar.h>
 
 bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInfo)
 {
@@ -12,7 +9,7 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
   HDC hCurrScreen = GetDC(NULL);
 
   //创建一个兼容的DC,在内存中表示当前位图的上下文
-  HDC hCmpDC = CreateCompatibleDC(hCurrScreen);
+  HDC hMemDC = CreateCompatibleDC(hCurrScreen);
 
   //宽高
   int iShotWidth,iShotHeight;
@@ -40,10 +37,10 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
   HBITMAP hBmp = CreateCompatibleBitmap(hCurrScreen, iShotWidth, iShotHeight);
 
   //用当前位图句柄表示内存中屏幕位图上下文
-  SelectObject(hCmpDC,hBmp);
+  SelectObject(hMemDC,hBmp);
 
   //将当前屏幕图像复制到内存中
-  BOOL ret = BitBlt(hCmpDC, 0, 0, iShotWidth, iShotHeight, hCurrScreen, iShotStartX, iShotStartY, SRCCOPY);
+  BOOL ret = BitBlt(hMemDC, 0, 0, iShotWidth, iShotHeight, hCurrScreen, iShotStartX, iShotStartY, SRCCOPY);
 
   //BMP图像信息头
   BITMAPINFOHEADER hBmpInfo;
@@ -84,7 +81,7 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
 
   //检索指定的兼容位图中的所有位元数据
   //并复制到指定格式的设备无关位图的缓存中
-  GetDIBits(hCmpDC, hBmp, 0, (UINT)iShotHeight, bmpSrc, (BITMAPINFO*)&hBmpInfo, DIB_RGB_COLORS);
+  GetDIBits(hMemDC, hBmp, 0, (UINT)iShotHeight, bmpSrc, (BITMAPINFO*)&hBmpInfo, DIB_RGB_COLORS);
 
   //汇总所有数据信息
   char *szBmp = new char[dwPicSize];
@@ -103,7 +100,7 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
 
   //释放资源
   DeleteObject(hBmp);
-  DeleteObject(hCmpDC);
+  DeleteObject(hMemDC);
   ReleaseDC(NULL, hCurrScreen);
   delete[] szBmp;
   delete[] bmpSrc;
@@ -112,7 +109,7 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
   return true;
 }
 
-bool common::winutil::WindowGetShotInfo(HWND hWnd, common::winutil::ShotRect &ShotInfo)
+bool common::winutil::WndGetShotRect(HWND hWnd, ShotRect &ShotInfo)
 {
   if (NULL == hWnd)
   {
@@ -120,21 +117,21 @@ bool common::winutil::WindowGetShotInfo(HWND hWnd, common::winutil::ShotRect &Sh
   }
 
   //获取窗口矩形结构
-  RECT rect;
-  GetWindowRect(hWnd, &rect);
+  RECT wndRect;
+  GetWindowRect(hWnd, &wndRect);
 
   //窗口大小信息
-  ShotInfo.x_start = rect.left;
-  ShotInfo.y_start = rect.top;
-  ShotInfo.x_end = rect.right;
-  ShotInfo.y_end = rect.bottom;
-  ShotInfo.rect_width = rect.right - rect.left;
-  ShotInfo.rect_height = rect.bottom - rect.top;
+  ShotInfo.x_start = wndRect.left;
+  ShotInfo.y_start = wndRect.top;
+  ShotInfo.x_end = wndRect.right;
+  ShotInfo.y_end = wndRect.bottom;
+  ShotInfo.rect_width = wndRect.right - wndRect.left;
+  ShotInfo.rect_height = wndRect.bottom - wndRect.top;
 
   return true;
 }
 
-bool common::winutil::SetWindowTop(HWND hWnd, bool isTop)
+bool common::winutil::SetWndTop(HWND hWnd, bool isTop)
 {
   bool retVal = false;
 
@@ -144,7 +141,6 @@ bool common::winutil::SetWindowTop(HWND hWnd, bool isTop)
                           HWND_TOPMOST,
                           0, 0, 0, 0,
                           SWP_ASYNCWINDOWPOS | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-    Sleep(50);
   }
   else
   {
@@ -155,6 +151,35 @@ bool common::winutil::SetWindowTop(HWND hWnd, bool isTop)
   }
 
   return retVal;
+}
+
+HWND common::winutil::GetWndByClsAndName(const TCHAR* szWndCls, const TCHAR* szWndName)
+{
+  return FindWindow(szWndCls, szWndName);
+}
+
+void common::winutil::WndGetShotcut(HWND hWnd, const char *szSavePath)
+{
+  common::winutil::SetWndTop(hWnd, true);
+
+  //等待窗口出来再截图
+  Sleep(200);
+
+  common::winutil::ShotRect ShotPos;
+  common::winutil::WndGetShotRect(hWnd, ShotPos);
+
+  common::winutil::ScreenShot(szSavePath, &ShotPos);
+
+  common::winutil::SetWndTop(hWnd, false);
+}
+
+void common::winutil::SendWndMouseClickL(HWND hWnd, Pos clickPos)
+{
+  LPARAM pos = MAKELONG(clickPos.x,clickPos.y);
+
+  SendMessage(hWnd, WM_LBUTTONDOWN, NULL, pos);
+  Sleep(50);
+  SendMessage(hWnd, WM_LBUTTONUP, NULL, pos);
 }
 
 /*

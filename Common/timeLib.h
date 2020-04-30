@@ -1,9 +1,10 @@
 #ifndef _TSI_TIME_
 #define _TSI_TIME_
 
-#include <time.h>
+#include <chrono>
 
 #ifdef _WIN32
+#include <time.h>
 #include <WinSock2.h>
 #pragma comment (lib,"ws2_32.lib")
 #else
