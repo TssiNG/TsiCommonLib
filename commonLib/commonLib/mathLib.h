@@ -8,7 +8,9 @@ namespace common
 namespace math
 {
 
-size_t fibonacci(size_t idx);
+size_t rec_fibonacci(int idx);
+
+size_t dp_fibonacci(int idx);
 
 }
 }
