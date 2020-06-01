@@ -157,6 +157,7 @@
     <ClInclude Include="..\..\Common\timeLib.h" />
     <ClInclude Include="..\..\Common\windowsUtil.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="mathLib.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
