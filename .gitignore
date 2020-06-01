@@ -42,3 +42,5 @@ commonLib/.vs/commonLib/v16/.suo
 commonLib/commonLib/Debug/commonLib.vcxproj.FileListAbsolute.txt
 *.idb
 *.filters
+*.suo
+*.opendb
