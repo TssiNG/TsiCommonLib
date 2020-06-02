@@ -34,3 +34,13 @@ size_t common::math::dp_fibonacci(int idx)
 
   return fibonacci[idx - 1];
 }
+
+long long common::math::dicotomy_arr_peak(_Array peak_arr)
+{
+  //时间复杂度为logN的二分法
+}
+
+long long common::math::dicotomy_mat_peak(_Matrix peak_mat)
+{
+  //首先找到某一列的最大值, 然后在该点所在行进行二分搜索
+}
