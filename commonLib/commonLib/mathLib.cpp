@@ -35,12 +35,55 @@ size_t common::math::dp_fibonacci(int idx)
   return fibonacci[idx - 1];
 }
 
-long long common::math::dicotomy_arr_peak(_Array peak_arr)
+//二分法查找峰值 : 时间复杂度为logn
+long long common::math::dicotomy_arr_peak(const _Array arr, size_t _curr)
 {
-  //时间复杂度为logN的二分法
+  size_t _end_idx = arr.size() - 1;
+  
+  if (arr.empty())     return 0;
+  if (arr.size() == 1) return arr[0];
+  if (arr.size() == 2) return arr[0] >= arr[1] ? arr[0] : arr[1];
+
+  //初始索引为-1
+  if (_curr == -1)
+  {
+    _curr  = _end_idx / 2;
+  }
+  
+  //首尾直接返回
+  if (0 == _curr || _end_idx == _curr) return arr[_curr];
+
+  _Array dicotomy_arr = arr;
+
+  //当前索引值小于前一个索引值, 移除当前索引值之后的所有元素
+  if (arr[_curr] < arr[_LAST(_curr)])
+  {
+    dicotomy_arr.erase(dicotomy_arr.begin() + _curr, dicotomy_arr.end());
+
+    _curr = (dicotomy_arr.size() - 1) / 2;
+
+    return dicotomy_arr_peak(dicotomy_arr, _curr);
+  }
+  
+  //当前索引值小于后一个索引值, 移除当前索引值之前的所有元素
+  if (arr[_curr] < arr[_NEXT(_curr)])
+  {
+    dicotomy_arr.erase(dicotomy_arr.begin(), dicotomy_arr.begin() + _curr);
+
+    _curr = (dicotomy_arr.size() - 1) / 2;
+
+    return dicotomy_arr_peak(dicotomy_arr, _curr);
+  }
+
+  return arr[_curr];
 }
 
-long long common::math::dicotomy_mat_peak(_Matrix peak_mat)
+void common::math::insert_sort(const _Array &arr)
 {
-  //首先找到某一列的最大值, 然后在该点所在行进行二分搜索
+  //插入排序 : 时间复杂度为nlogn
+}
+
+void common::math::merge_sort(const _Array &arr)
+{
+  //归并排序 : 时间复杂度为nlogn
 }
