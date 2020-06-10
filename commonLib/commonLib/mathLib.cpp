@@ -78,12 +78,55 @@ long long common::math::dicotomy_arr_peak(const _Array arr, size_t _curr)
   return arr[_curr];
 }
 
-void common::math::insert_sort(const _Array &arr)
+//折半插入排序 : 时间复杂度为n^2
+void common::math::insert_sort(_Array &arr)
 {
-  //插入排序 : 时间复杂度为nlogn
+  for (size_t idx = 0; idx < arr.size(); ++idx)
+  {
+    size_t curr_val    = arr[idx];      //当前索引值
+    size_t curr_pos    = idx;           //当前索引初始位置
+    size_t compare_pos = curr_pos / 2;  //比较索引初始位置
+    bool   needInsert  = false;         //是否需要插入当前值
+
+    while (true)
+    {
+      //同一位置不比较
+      if (curr_pos == compare_pos) break;
+
+      if (curr_val < arr[compare_pos])
+      {
+        //将当前位移动至比较位, 下一个比较位为当前位折半
+        curr_pos    = compare_pos;
+        compare_pos = curr_pos / 2;
+        needInsert  = true;
+      }
+      else
+      {
+        //当前比较位为当前位的前一位则退出
+        if (compare_pos == (curr_pos - 1)) break;
+
+        //下一个比较位为当前位到当前比较位之间折半
+        compare_pos = (compare_pos + curr_pos) / 2;
+      }
+    }
+
+    if (needInsert)
+    {
+      //将当前值插入到当前索引位
+      arr.erase(arr.begin() + idx);
+      arr.insert(arr.begin() + curr_pos, curr_val);
+    }
+  }
 }
 
-void common::math::merge_sort(const _Array &arr)
+//归并排序 : 时间复杂度为nlogn
+void common::math::merge_sort(_Array &arr)
 {
-  //归并排序 : 时间复杂度为nlogn
+  
+}
+
+//堆排序 : 时间复杂度为nlogn
+void common::math::heap_sort(_Array& arr)
+{
+
 }

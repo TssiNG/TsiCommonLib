@@ -20,11 +20,11 @@ size_t dp_fibonacci(int idx);
 
 long long dicotomy_arr_peak(const _Array arr, size_t _mid_idx = -1);
 
-void insert_sort(const _Array &arr);
+void insert_sort(_Array &arr);
 
-void merge_sort(const _Array &arr);
+void merge_sort(_Array &arr);
 
-void heap_sort(const _Array &arr);
+void heap_sort(_Array &arr);
 
 }
 }
