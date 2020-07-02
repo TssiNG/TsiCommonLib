@@ -2,6 +2,7 @@
 #define _TSI_STRING_
 
 #include <string>
+#include <string.h>
 
 #ifdef WIN32
 #include <Windows.h>

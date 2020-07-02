@@ -1,23 +1,22 @@
-#include "pch.h"
 #include "windowsUtil.h"
 
 #ifdef _WIN32
 
 bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInfo)
 {
-  //��ʾ����Ļ
+  //显示器屏幕
   HDC hCurrScreen = GetDC(NULL);
 
-  //����һ�����ݵ�DC,���ڴ��б�ʾ��ǰλͼ��������
+  //创建一个兼容的DC,在内存中表示当前位图的上下文
   HDC hMemDC = CreateCompatibleDC(hCurrScreen);
 
-  //����
+  //宽高
   int iShotWidth,iShotHeight;
   
-  //��ͼ��ʼ����
+  //截图开始坐标
   int iShotStartX,iShotStartY;
 
-  //��ָ���������ȡȫ��Ļ
+  //不指定区域则截取全屏幕
   if (nullptr == ShotInfo)
   {
     iShotWidth  = GetDeviceCaps(hCurrScreen, HORZRES);
@@ -33,16 +32,16 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
     iShotStartY = ShotInfo->y_start;
   }
 
-  //��ǰ��Ļλͼ
+  //当前屏幕位图
   HBITMAP hBmp = CreateCompatibleBitmap(hCurrScreen, iShotWidth, iShotHeight);
 
-  //�õ�ǰλͼ�����ʾ�ڴ�����Ļλͼ������
+  //用当前位图句柄表示内存中屏幕位图上下文
   SelectObject(hMemDC,hBmp);
 
-  //����ǰ��Ļͼ���Ƶ��ڴ���
+  //将当前屏幕图像复制到内存中
   BOOL ret = BitBlt(hMemDC, 0, 0, iShotWidth, iShotHeight, hCurrScreen, iShotStartX, iShotStartY, SRCCOPY);
 
-  //BMPͼ����Ϣͷ
+  //BMP图像信息头
   BITMAPINFOHEADER hBmpInfo;
                    hBmpInfo.biSize          = INFO_HEAD;
                    hBmpInfo.biWidth         = iShotWidth;
@@ -57,17 +56,17 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
                    hBmpInfo.biYPelsPerMeter = V_RESOL_0;
 
   /* * * * * * * * * * * * * * * * * * * *
-   * Windows��4�ֽڷ����ڴ�
-   * ���ȼ���ÿ������Ҫ��bit��,����4�ֽڶ���
-   * �ڶԶ��������ݳ�4,��DWORDתΪBYTE
-   * ÿ��ʵ����ռBYTE��ͼ�������õ�����Դ��С
+   * Windows按4字节分配内存
+   * 首先计算每行所需要的bit数,并按4字节对齐
+   * 在对对齐后的数据乘4,从DWORD转为BYTE
+   * 每行实际所占BYTE乘图像列数得到数据源大小
    * * * * * * * * * * * * * * * * * * * */
   DWORD dwSrcSize = ((iShotWidth * hBmpInfo.biBitCount + 31) / 32) * 4 * iShotHeight;
   
-  //��ͼ�ܴ�С
+  //截图总大小
   DWORD dwPicSize = HEAD_SIZE + dwSrcSize;
 
-  //BMPͼ���ļ�ͷ
+  //BMP图像文件头
   BITMAPFILEHEADER hBmpFile;
                    hBmpFile.bfSize      = dwPicSize;
                    hBmpFile.bfType      = TYPE_BMP;
@@ -75,22 +74,22 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
                    hBmpFile.bfReserved1 = MUST_ZERO;
                    hBmpFile.bfReserved2 = MUST_ZERO;
 
-  //BMPͼ������Դ
+  //BMP图像数据源
   char *bmpSrc = new char[dwSrcSize];
   ZeroMemory(bmpSrc, dwSrcSize);
 
-  //����ָ���ļ���λͼ�е�����λԪ����
-  //�����Ƶ�ָ����ʽ���豸�޹�λͼ�Ļ�����
+  //检索指定的兼容位图中的所有位元数据
+  //并复制到指定格式的设备无关位图的缓存中
   GetDIBits(hMemDC, hBmp, 0, (UINT)iShotHeight, bmpSrc, (BITMAPINFO*)&hBmpInfo, DIB_RGB_COLORS);
 
-  //��������������Ϣ
+  //汇总所有数据信息
   char *szBmp = new char[dwPicSize];
   ZeroMemory(szBmp, dwPicSize);
   memcpy(szBmp, (void*)&hBmpFile, FILE_HEAD);
   memcpy(szBmp + FILE_HEAD, (void*)&hBmpInfo, INFO_HEAD);
   memcpy(szBmp + HEAD_SIZE, bmpSrc, dwSrcSize);
 
-  //����BMPͼ��
+  //保存BMP图像
   FILE *hFile = fopen(szSavePath, "wb+");
   if (nullptr != hFile)
   {
@@ -98,7 +97,7 @@ bool common::winutil::ScreenShot(const char* szSavePath, const ShotRect *ShotInf
     fclose(hFile);
   }
 
-  //�ͷ���Դ
+  //释放资源
   DeleteObject(hBmp);
   DeleteObject(hMemDC);
   ReleaseDC(NULL, hCurrScreen);
@@ -116,11 +115,11 @@ bool common::winutil::WndGetShotRect(HWND hWnd, ShotRect &ShotInfo)
     return false;
   }
 
-  //��ȡ���ھ��νṹ
+  //获取窗口矩形结构
   RECT wndRect;
   GetWindowRect(hWnd, &wndRect);
 
-  //���ڴ�С��Ϣ
+  //窗口大小信息
   ShotInfo.x_start = wndRect.left;
   ShotInfo.y_start = wndRect.top;
   ShotInfo.x_end = wndRect.right;
@@ -162,7 +161,7 @@ void common::winutil::WndGetShotcut(HWND hWnd, const char *szSavePath)
 {
   common::winutil::SetWndTop(hWnd, true);
 
-  //�ȴ����ڳ����ٽ�ͼ
+  //等待窗口出来再截图
   Sleep(200);
 
   common::winutil::ShotRect ShotPos;

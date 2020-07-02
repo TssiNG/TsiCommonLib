@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "mathLib.h"
 
 size_t common::math::rec_fibonacci(int idx)
@@ -35,7 +34,7 @@ size_t common::math::dp_fibonacci(int idx)
   return fibonacci[idx - 1];
 }
 
-//¶ş·Ö·¨²éÕÒ·åÖµ : Ê±¼ä¸´ÔÓ¶ÈÎªlogn
+//äºŒåˆ†æ³•æŸ¥æ‰¾å³°å€¼ : æ—¶é—´å¤æ‚åº¦ä¸ºlogn
 long long common::math::dicotomy_arr_peak(const _Array arr, size_t _curr)
 {
   size_t _end_idx = arr.size() - 1;
@@ -44,18 +43,18 @@ long long common::math::dicotomy_arr_peak(const _Array arr, size_t _curr)
   if (arr.size() == 1) return arr[0];
   if (arr.size() == 2) return arr[0] >= arr[1] ? arr[0] : arr[1];
 
-  //³õÊ¼Ë÷ÒıÎª-1
+  //åˆå§‹ç´¢å¼•ä¸º-1
   if (_curr == -1)
   {
     _curr  = _end_idx / 2;
   }
   
-  //Ê×Î²Ö±½Ó·µ»Ø
+  //é¦–å°¾ç›´æ¥è¿”å›
   if (0 == _curr || _end_idx == _curr) return arr[_curr];
 
   _Array dicotomy_arr = arr;
 
-  //µ±Ç°Ë÷ÒıÖµĞ¡ÓÚÇ°Ò»¸öË÷ÒıÖµ, ÒÆ³ıµ±Ç°Ë÷ÒıÖµÖ®ºóµÄËùÓĞÔªËØ
+  //å½“å‰ç´¢å¼•å€¼å°äºå‰ä¸€ä¸ªç´¢å¼•å€¼, ç§»é™¤å½“å‰ç´¢å¼•å€¼ä¹‹åçš„æ‰€æœ‰å…ƒç´ 
   if (arr[_curr] < arr[_LAST(_curr)])
   {
     dicotomy_arr.erase(dicotomy_arr.begin() + _curr, dicotomy_arr.end());
@@ -65,7 +64,7 @@ long long common::math::dicotomy_arr_peak(const _Array arr, size_t _curr)
     return dicotomy_arr_peak(dicotomy_arr, _curr);
   }
   
-  //µ±Ç°Ë÷ÒıÖµĞ¡ÓÚºóÒ»¸öË÷ÒıÖµ, ÒÆ³ıµ±Ç°Ë÷ÒıÖµÖ®Ç°µÄËùÓĞÔªËØ
+  //å½“å‰ç´¢å¼•å€¼å°äºåä¸€ä¸ªç´¢å¼•å€¼, ç§»é™¤å½“å‰ç´¢å¼•å€¼ä¹‹å‰çš„æ‰€æœ‰å…ƒç´ 
   if (arr[_curr] < arr[_NEXT(_curr)])
   {
     dicotomy_arr.erase(dicotomy_arr.begin(), dicotomy_arr.begin() + _curr);
@@ -78,54 +77,54 @@ long long common::math::dicotomy_arr_peak(const _Array arr, size_t _curr)
   return arr[_curr];
 }
 
-//ÕÛ°ë²åÈëÅÅĞò : Ê±¼ä¸´ÔÓ¶ÈÎªn^2
+//æŠ˜åŠæ’å…¥æ’åº : æ—¶é—´å¤æ‚åº¦ä¸ºn^2
 void common::math::insert_sort(_Array &arr)
 {
   for (size_t idx = 0; idx < arr.size(); ++idx)
   {
-    size_t curr_val    = arr[idx];      //µ±Ç°Ë÷ÒıÖµ
-    size_t curr_pos    = idx;           //µ±Ç°Ë÷Òı³õÊ¼Î»ÖÃ
-    size_t compare_pos = curr_pos / 2;  //±È½ÏË÷Òı³õÊ¼Î»ÖÃ
-    bool   needInsert  = false;         //ÊÇ·ñĞèÒª²åÈëµ±Ç°Öµ
+    size_t curr_val    = arr[idx];      //å½“å‰ç´¢å¼•å€¼
+    size_t curr_pos    = idx;           //å½“å‰ç´¢å¼•åˆå§‹ä½ç½®
+    size_t compare_pos = curr_pos / 2;  //æ¯”è¾ƒç´¢å¼•åˆå§‹ä½ç½®
+    bool   needInsert  = false;         //æ˜¯å¦éœ€è¦æ’å…¥å½“å‰å€¼
 
     while (true)
     {
-      //Í¬Ò»Î»ÖÃ²»±È½Ï
+      //åŒä¸€ä½ç½®ä¸æ¯”è¾ƒ
       if (curr_pos == compare_pos) break;
 
       if (curr_val < arr[compare_pos])
       {
-        //½«µ±Ç°Î»ÒÆ¶¯ÖÁ±È½ÏÎ», ÏÂÒ»¸ö±È½ÏÎ»Îªµ±Ç°Î»ÕÛ°ë
+        //å°†å½“å‰ä½ç§»åŠ¨è‡³æ¯”è¾ƒä½, ä¸‹ä¸€ä¸ªæ¯”è¾ƒä½ä¸ºå½“å‰ä½æŠ˜åŠ
         curr_pos    = compare_pos;
         compare_pos = curr_pos / 2;
         needInsert  = true;
       }
       else
       {
-        //µ±Ç°±È½ÏÎ»Îªµ±Ç°Î»µÄÇ°Ò»Î»ÔòÍË³ö
+        //å½“å‰æ¯”è¾ƒä½ä¸ºå½“å‰ä½çš„å‰ä¸€ä½åˆ™é€€å‡º
         if (compare_pos == (curr_pos - 1)) break;
 
-        //ÏÂÒ»¸ö±È½ÏÎ»Îªµ±Ç°Î»µ½µ±Ç°±È½ÏÎ»Ö®¼äÕÛ°ë
+        //ä¸‹ä¸€ä¸ªæ¯”è¾ƒä½ä¸ºå½“å‰ä½åˆ°å½“å‰æ¯”è¾ƒä½ä¹‹é—´æŠ˜åŠ
         compare_pos = (compare_pos + curr_pos) / 2;
       }
     }
 
     if (needInsert)
     {
-      //½«µ±Ç°Öµ²åÈëµ½µ±Ç°Ë÷ÒıÎ»
+      //å°†å½“å‰å€¼æ’å…¥åˆ°å½“å‰ç´¢å¼•ä½
       arr.erase(arr.begin() + idx);
       arr.insert(arr.begin() + curr_pos, curr_val);
     }
   }
 }
 
-//¹é²¢ÅÅĞò : Ê±¼ä¸´ÔÓ¶ÈÎªnlogn
+//å½’å¹¶æ’åº : æ—¶é—´å¤æ‚åº¦ä¸ºnlogn
 void common::math::merge_sort(_Array &arr)
 {
   
 }
 
-//¶ÑÅÅĞò : Ê±¼ä¸´ÔÓ¶ÈÎªnlogn
+//å †æ’åº : æ—¶é—´å¤æ‚åº¦ä¸ºnlogn
 void common::math::heap_sort(_Array& arr)
 {
 
