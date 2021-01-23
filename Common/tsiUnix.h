@@ -12,7 +12,7 @@
 
 namespace common
 {
-namespace unix
+namespace util
 {
 
 typedef struct
@@ -21,7 +21,7 @@ typedef struct
   std::string _sh;
 }ShellSignal;
 
-void signal_to_str(const int _bash_sg, ShellSignal &_signal, );
+void signal_to_str(const int _bash_sg, ShellSignal &_signal);
 
 void get_cmd_result(const std::string &cmd, std::string result);
 

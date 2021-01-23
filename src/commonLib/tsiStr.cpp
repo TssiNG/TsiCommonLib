@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "strLib.h"
+#include "tsiStr.h"
 
 void common::str::strReplace(std::string &src, const char *from, const char *to)
 {
@@ -16,9 +15,9 @@ void common::str::strReplace(std::string &src, const char *from, const char *to)
 
 double common::str::sci2db(const std::string &strSci)
 {
-  int    iPower       = 0;  //ÃÝ
-  double dMntsa       = 0;  //Î²Êý
-  double dCoefficient = 1;  //ÏµÊý
+  int    iPower       = 0;  //å¹‚
+  double dMntsa       = 0;  //å°¾æ•°
+  double dCoefficient = 1;  //ç³»æ•°
 
   std::string strPower, strMntsa;
 
